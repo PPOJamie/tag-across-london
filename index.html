@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#08111f" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon-192.png" />
+  <title>Tag Across London</title>
+  <style>
+    :root {
+      --bg0: #06101f;
+      --bg1: #0a1528;
+      --panel: rgba(15, 23, 42, 0.84);
+      --panel-strong: rgba(15, 23, 42, 0.96);
+      --line: rgba(255,255,255,.10);
+      --text: #eef4ff;
+      --muted: #a7b6d9;
+      --good: #34d399;
+      --warn: #fbbf24;
+      --bad: #fb7185;
+      --accent: #7dd3fc;
+      --accent2: #a78bfa;
+      --shadow: 0 24px 60px rgba(0,0,0,.34);
+      --radius: 24px;
+    }
+    html[data-theme="light"] {
+      --bg0: #eff4fb;
+      --bg1: #dce7f7;
+      --panel: rgba(255,255,255,.84);
+      --panel-strong: rgba(255,255,255,.97);
+      --line: rgba(13,20,33,.10);
+      --text: #10192a;
+      --muted: #5f6f8f;
+      --shadow: 0 20px 40px rgba(34,56,104,.16);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(125,211,252,.18), transparent 22%),
+        radial-gradient(circle at top right, rgba(167,139,250,.14), transparent 20%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .wrap { max-width: 1260px; margin: 0 auto; padding: 14px 12px 36px; }
+    .hero {
+      position: sticky; top: 0; z-index: 20;
+      margin: -14px -12px 14px; padding: 14px 12px 12px;
+      background: linear-gradient(180deg, rgba(6,16,31,.98), rgba(6,16,31,.88));
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line);
+    }
+    html[data-theme="light"] .hero {
+      background: linear-gradient(180deg, rgba(239,244,251,.98), rgba(239,244,251,.88));
+    }
+    .heroRow { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+    .titleBlock h1 { margin:0; font-size:1.42rem; line-height:1.06; letter-spacing:-.04em; }
+    .titleBlock p { margin:.35rem 0 0; color:var(--muted); font-size:.94rem; line-height:1.45; }
+    .heroBtns { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .chipRow { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+    .chip {
+      display:inline-flex; align-items:center; gap:8px;
+      border:1px solid var(--line); border-radius:999px; padding:9px 12px;
+      background: rgba(255,255,255,.05); color:var(--text); font-size:.86rem;
+    }
+    .dot { width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 4px rgba(125,211,252,.14); }
+    .grid2 { display:grid; grid-template-columns: 1.04fr .96fr; gap:12px; margin-bottom:12px; }
+    .gridMain { display:grid; grid-template-columns: 1.15fr .85fr; gap:12px; }
+    @media (max-width: 980px) { .grid2, .gridMain { grid-template-columns: 1fr; } .hero { position:relative; } }
+    .card {
+      border:1px solid var(--line); background: linear-gradient(180deg, var(--panel), rgba(255,255,255,.03));
+      border-radius: var(--radius); box-shadow: var(--shadow); overflow:hidden;
+    }
+    .cardHead {
+      padding: 14px 16px 10px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+      border-bottom:1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.05), transparent);
+    }
+    .cardHead h2 { margin:0; font-size:1.01rem; letter-spacing:-.02em; }
+    .tiny { font-size:.76rem; color:var(--muted); }
+    .cardBody { padding:14px 16px 16px; }
+    .btn {
+      appearance:none; border:0; border-radius:18px; padding:13px 14px;
+      background: linear-gradient(180deg, rgba(125,211,252,.98), rgba(96,165,250,.92));
+      color:#05111e; font-weight:900; box-shadow: 0 12px 30px rgba(37,99,235,.2);
+    }
+    .btn.secondary { background: rgba(255,255,255,.06); color:var(--text); border:1px solid var(--line); box-shadow:none; }
+    .btn.good { background: linear-gradient(180deg, rgba(52,211,153,.96), rgba(16,185,129,.95)); color:#032115; }
+    .btn.warn { background: linear-gradient(180deg, rgba(251,191,36,.96), rgba(245,158,11,.95)); color:#221500; }
+    .btn.danger { background: linear-gradient(180deg, rgba(251,113,133,.96), rgba(244,63,94,.95)); color:#2a0710; }
+    .btn.sm { padding:10px 12px; border-radius:14px; font-size:.86rem; }
+    .btn:disabled { opacity:.46; cursor:not-allowed; }
+    .controls { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
+    @media (max-width: 740px) { .controls { grid-template-columns:1fr; } }
+    .deck { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
+    @media (max-width: 960px) { .deck { grid-template-columns:1fr; } }
+    .wheelBox {
+      position:relative; min-height: 242px; border-radius: 22px; border:1px solid var(--line);
+      padding:14px; background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      overflow:hidden;
+    }
+    .wheelBox::before {
+      content:''; position:absolute; inset:-40% -20% auto auto; width:260px; height:260px; border-radius:50%;
+      background: radial-gradient(circle at center, rgba(125,211,252,.22), transparent 55%);
+      pointer-events:none;
+    }
+    .wheelTop { display:flex; justify-content:space-between; gap:10px; align-items:baseline; margin-bottom:12px; }
+    .wheelTop strong { font-size:.98rem; }
+    .wheelTop span { color:var(--muted); font-size:.8rem; }
+    .wheel {
+      height: 96px; display:flex; align-items:center; justify-content:center; text-align:center;
+      border-radius: 22px; border:1px solid rgba(255,255,255,.08); background: rgba(8,13,25,.78);
+      font-size:1.12rem; line-height:1.3; font-weight:900; padding: 0 12px; letter-spacing:-.03em;
+      transition: transform .25s ease, filter .25s ease;
+    }
+    html[data-theme="light"] .wheel { background: rgba(255,255,255,.82); }
+    .wheel.spin { animation: spinPulse .65s ease; }
+    @keyframes spinPulse { 0% { transform: scale(.95) rotate(-4deg); filter:brightness(1.1); } 50% { transform: scale(1.02) rotate(3deg); } 100% { transform: scale(1) rotate(0); } }
+    .stack { display:grid; gap:8px; margin-top:12px; }
+    .routeInfo { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+    @media (max-width: 700px) { .routeInfo { grid-template-columns:1fr; } }
+    .routeCard, .fieldCard {
+      padding:13px 14px; border-radius:18px; border:1px solid var(--line); background: rgba(255,255,255,.04);
+    }
+    .routeCard .label, .fieldLabel { color:var(--muted); text-transform:uppercase; letter-spacing:.12em; font-size:.74rem; }
+    .routeCard .value { margin-top:6px; font-weight:850; line-height:1.35; }
+    .stats { display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; }
+    @media (max-width: 700px) { .stats { grid-template-columns:1fr; } }
+    .teamCard {
+      padding:14px; border-radius:20px; border:1px solid var(--line); background: rgba(255,255,255,.04);
+      display:grid; gap:10px;
+    }
+    .teamTop { display:flex; justify-content:space-between; gap:10px; align-items:center; }
+    .teamTop input[type="text"] {
+      width: 100%; border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--text); border-radius:14px;
+      padding: 11px 12px; font-weight:800;
+    }
+    .teamRow { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .teamScore { display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+    .teamScore .num { font-size:1.9rem; font-weight:950; letter-spacing:-.05em; }
+    .teamScore .meta { color:var(--muted); font-size:.82rem; }
+    .swatch { width: 18px; height: 18px; border-radius: 50%; border:1px solid rgba(255,255,255,.5); }
+    .pill { display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; background: rgba(255,255,255,.04); border:1px solid var(--line); }
+    .mapWrap {
+      border-radius:20px; border:1px solid var(--line); background: rgba(255,255,255,.03); overflow:auto;
+    }
+    .mapInner { min-width: 100%; }
+    .routesvg text { font-size: 12px; font-weight: 800; fill: var(--text); paint-order: stroke; stroke: rgba(6,16,31,.95); stroke-width: 4px; }
+    html[data-theme="light"] .routesvg text { stroke: rgba(255,255,255,.9); }
+    .routesvg .route { fill:none; stroke-width:4; stroke-linecap:round; opacity:.18; }
+    .routesvg .route.active { opacity:1; stroke-width:7; }
+    .routesvg .node { stroke: rgba(255,255,255,.9); stroke-width:2; }
+    .routesvg .node.start { fill:#fb923c; }
+    .routesvg .node.dest { fill:#22c55e; }
+    .routesvg .node.selected { stroke:#fff; stroke-width:4; }
+    .routesvg .titleBand { fill: rgba(8,17,31,.84); }
+    html[data-theme="light"] .routesvg .titleBand { fill: rgba(255,255,255,.82); }
+    .legend { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .tag { padding:7px 10px; border-radius:999px; border:1px solid var(--line); background: rgba(255,255,255,.04); color:var(--muted); font-size:.82rem; }
+    .timerGrid { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
+    @media (max-width: 800px) { .timerGrid { grid-template-columns:1fr; } }
+    .timer {
+      padding:14px; border-radius:18px; border:1px solid var(--line); background: rgba(255,255,255,.04);
+    }
+    .timer .name { display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
+    .timer .name strong { font-size:.94rem; }
+    .time { margin-top:8px; font-size:1.4rem; font-weight:950; letter-spacing:-.04em; }
+    .bar { margin-top:10px; height:10px; border-radius:999px; background: rgba(255,255,255,.08); overflow:hidden; }
+    .bar > i { display:block; height:100%; width:0%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius:999px; }
+    .formRow { display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:end; }
+    @media (max-width: 700px) { .formRow { grid-template-columns:1fr; } }
+    .field { display:grid; gap:6px; }
+    .field label { color:var(--muted); font-size:.82rem; }
+    input, select, textarea {
+      width:100%; border:1px solid var(--line); background: rgba(255,255,255,.04); color:var(--text);
+      border-radius:16px; padding:13px 14px; outline:none;
+    }
+    input::placeholder, textarea::placeholder { color: rgba(167,182,217,.68); }
+    .msgBox {
+      min-height: 76px; border-radius:18px; padding:14px; border:1px solid rgba(255,255,255,.08);
+      background: rgba(8,13,25,.8); font-weight:750; line-height:1.45;
+    }
+    html[data-theme="light"] .msgBox { background: rgba(255,255,255,.88); }
+    .log { display:grid; gap:8px; max-height:280px; overflow:auto; padding-right:4px; }
+    .logItem {
+      border-radius:16px; padding:11px 12px; border:1px solid var(--line); background: rgba(255,255,255,.04);
+      color:var(--muted); font-size:.88rem; line-height:1.45;
+    }
+    .logItem strong { color:var(--text); }
+    .proofBox {
+      display:grid; grid-template-columns: 1fr 160px; gap:10px; align-items:start;
+    }
+    @media (max-width: 700px) { .proofBox { grid-template-columns: 1fr; } }
+    .proofPreview {
+      min-height: 160px; border-radius:18px; border:1px dashed var(--line); background: rgba(255,255,255,.03);
+      display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative;
+    }
+    .proofPreview img { width:100%; height:100%; object-fit:cover; display:block; }
+    .proofPreview .empty { color:var(--muted); font-size:.88rem; padding:16px; text-align:center; }
+    .routePills { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .routePills button { border:1px solid var(--line); border-radius:999px; padding:8px 11px; background: rgba(255,255,255,.05); color:var(--text); }
+    .footerNote { margin: 14px 4px 0; text-align:center; color:var(--muted); font-size:.78rem; }
+    .shake { animation: shake .35s ease; }
+    @keyframes shake { 0%{transform:translateX(0)} 25%{transform:translateX(-3px)} 50%{transform:translateX(3px)} 75%{transform:translateX(-2px)} 100%{transform:translateX(0)} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="heroRow">
+        <div class="titleBlock">
+          <h1>Tag Across London</h1>
+          <p>Mobile-first game board with spinners, route locks, map highlighting, challenge proof, and fast transit links.</p>
+        </div>
+        <div class="heroBtns">
+          <button class="btn secondary" id="themeBtn" type="button">Toggle theme</button>
+          <button class="btn secondary" id="installBtn" type="button" style="display:none;">Install app</button>
+        </div>
+      </div>
+      <div class="chipRow">
+        <div class="chip"><span class="dot"></span><span id="chipRoute">No route locked</span></div>
+        <div class="chip"><span class="dot" style="background:var(--good); box-shadow:0 0 0 4px rgba(52,211,153,.14)"></span><span id="chipRound">Round 1</span></div>
+        <div class="chip"><span class="dot" style="background:var(--warn); box-shadow:0 0 0 4px rgba(251,191,36,.14)"></span><span id="chipReroll">Free reroll ready</span></div>
+      </div>
+    </header>
+
+    <section class="grid2">
+      <div class="card">
+        <div class="cardHead"><h2>Teams</h2><span class="tiny">Rename teams and pick colours</span></div>
+        <div class="cardBody">
+          <div class="stats">
+            <div class="teamCard" id="teamCardRunners">
+              <div class="teamTop">
+                <input id="teamNameRunners" type="text" value="Runners" aria-label="Runner team name" />
+                <input id="teamColorRunners" type="color" value="#7dd3fc" aria-label="Runner team colour" style="width:48px;height:40px;padding:0;border-radius:12px;" />
+              </div>
+              <div class="teamScore">
+                <div>
+                  <div class="meta">Points</div>
+                  <div class="num" id="scoreRunners">0</div>
+                </div>
+                <div class="pill"><span class="swatch" id="swatchRunners" style="background:#7dd3fc"></span><span id="roleLabel">Active: Runners</span></div>
+              </div>
+              <div class="teamRow">
+                <button class="btn good sm" type="button" onclick="addPoint('runners')">+ point</button>
+                <button class="btn secondary sm" type="button" onclick="removePoint('runners')">- point</button>
+              </div>
+            </div>
+            <div class="teamCard" id="teamCardChasers">
+              <div class="teamTop">
+                <input id="teamNameChasers" type="text" value="Chasers" aria-label="Chaser team name" />
+                <input id="teamColorChasers" type="color" value="#34d399" aria-label="Chaser team colour" style="width:48px;height:40px;padding:0;border-radius:12px;" />
+              </div>
+              <div class="teamScore">
+                <div>
+                  <div class="meta">Points</div>
+                  <div class="num" id="scoreChasers">0</div>
+                </div>
+                <div class="pill"><span class="swatch" id="swatchChasers" style="background:#34d399"></span><span>Challenge wins count</span></div>
+              </div>
+              <div class="teamRow">
+                <button class="btn warn sm" type="button" onclick="addPoint('chasers')">+ point</button>
+                <button class="btn secondary sm" type="button" onclick="removePoint('chasers')">- point</button>
+              </div>
+            </div>
+          </div>
+          <div class="teamRow" style="margin-top:10px;">
+            <button class="btn secondary" type="button" onclick="switchRole()">Switch active role</button>
+            <button class="btn secondary" type="button" onclick="newRound()">Next round</button>
+            <button class="btn secondary" type="button" onclick="resetGame()">Reset game</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cardHead"><h2>Route status</h2><span class="tiny">Open transit links once locked</span></div>
+        <div class="cardBody">
+          <div class="routeInfo">
+            <div class="routeCard"><div class="label">Current route</div><div class="value" id="routeSummary">No route locked yet</div></div>
+            <div class="routeCard"><div class="label">Current challenge</div><div class="value" id="challengeSummary">No challenge selected</div></div>
+          </div>
+          <div class="routePills" id="routeAlternatives"></div>
+          <div class="stack">
+            <button class="btn" type="button" onclick="openGoogleMapsTransit()">Open in Google Maps</button>
+            <button class="btn secondary" type="button" onclick="copyTransitLink()">Copy transit link</button>
+            <button class="btn secondary" type="button" onclick="shareTransitLink()">Share route</button>
+          </div>
+          <p class="tiny" style="margin-top:10px;">The app uses the locked start and destination to generate a transit link on your phone, so you can choose routes in Google Maps without needing API keys.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-bottom:12px;">
+      <div class="cardHead"><h2>Spinner deck</h2><span class="tiny">Start, destination, and challenge wheels</span></div>
+      <div class="cardBody">
+        <div class="controls">
+          <button class="btn" type="button" onclick="spinStart()">Spin start</button>
+          <button class="btn secondary" type="button" onclick="spinDestination()">Spin destination</button>
+          <button class="btn secondary" type="button" onclick="spinChallenge()">Spin challenge</button>
+        </div>
+        <div class="deck" style="margin-top:10px;">
+          <div class="wheelBox">
+            <div class="wheelTop"><strong>Start station</strong><span>6 options</span></div>
+            <div class="wheel" id="startWheel">Tap spin</div>
+            <div class="stack">
+              <button class="btn secondary" type="button" onclick="lockStart()">Lock start</button>
+            </div>
+          </div>
+          <div class="wheelBox">
+            <div class="wheelTop"><strong>Destination wheel</strong><span>Filtered by start</span></div>
+            <div class="wheel" id="destWheel">Pick a start first</div>
+            <div class="stack">
+              <button class="btn secondary" type="button" onclick="lockRoute()">Lock route</button>
+            </div>
+          </div>
+          <div class="wheelBox">
+            <div class="wheelTop"><strong>Challenge wheel</strong><span>31 challenges</span></div>
+            <div class="wheel" id="challengeWheel" style="font-size:1rem;">Tap spin for a challenge</div>
+            <div class="stack">
+              <button class="btn secondary" type="button" onclick="rerollChallenge()">Reroll once / round</button>
+              <button class="btn good" type="button" onclick="completeChallenge()">Mark challenge done</button>
+            </div>
+          </div>
+        </div>
+        <div class="routeInfo">
+          <div class="routeCard"><div class="label">Locked route</div><div class="value" id="lockedRouteText">Nothing locked yet</div></div>
+          <div class="routeCard"><div class="label">How it works</div><div class="value">Spin, tap, lock, then open the transit link when you need the best route.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="gridMain">
+      <div class="card">
+        <div class="cardHead"><h2>Interactive map</h2><span class="tiny">Tap nodes or use the spinner</span></div>
+        <div class="cardBody">
+          <div class="mapWrap">
+            <div class="mapInner">
+              <svg class="routesvg" id="mapSvg" viewBox="0 0 1000 660" width="100%" height="auto" role="img" aria-label="Route map"></svg>
+            </div>
+          </div>
+          <div class="legend">
+            <div class="tag">Orange = starts</div>
+            <div class="tag">Green = destinations</div>
+            <div class="tag">Bright line = locked route</div>
+            <div class="tag">Tap stations to set them</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cardHead"><h2>Timers</h2><span class="tiny">Head start, bus, challenge</span></div>
+        <div class="cardBody">
+          <div class="timerGrid">
+            <div class="timer">
+              <div class="name"><strong>Head start</strong><span>15 min</span></div>
+              <div class="time" id="headTimer">Ready</div>
+              <div class="bar"><i id="headBar"></i></div>
+              <div class="teamRow" style="margin-top:10px;"><button class="btn secondary sm" type="button" onclick="startTimer('head',15)">Start</button><button class="btn secondary sm" type="button" onclick="clearTimer('head')">Clear</button></div>
+            </div>
+            <div class="timer">
+              <div class="name"><strong>Bus timer</strong><span>10 min</span></div>
+              <div class="time" id="busTimer">Ready</div>
+              <div class="bar"><i id="busBar"></i></div>
+              <div class="teamRow" style="margin-top:10px;"><button class="btn secondary sm" type="button" onclick="startTimer('bus',10)">Start</button><button class="btn secondary sm" type="button" onclick="clearTimer('bus')">Clear</button></div>
+            </div>
+            <div class="timer">
+              <div class="name"><strong>Challenge timer</strong><span>15 min</span></div>
+              <div class="time" id="challengeTimer">Ready</div>
+              <div class="bar"><i id="challengeBar"></i></div>
+              <div class="teamRow" style="margin-top:10px;"><button class="btn secondary sm" type="button" onclick="startTimer('challenge',15)">Start</button><button class="btn secondary sm" type="button" onclick="clearTimer('challenge')">Clear</button></div>
+            </div>
+          </div>
+          <p class="tiny" style="margin:12px 0 0;">When the challenge timer runs out, the reroll stays available for the timeout reroll in the rules.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid2" style="margin-top:12px;">
+      <div class="card">
+        <div class="cardHead"><h2>Challenge proof</h2><span class="tiny">Camera-friendly on mobile</span></div>
+        <div class="cardBody">
+          <div class="formRow" style="margin-bottom:10px;">
+            <div class="field">
+              <label for="proofInput">Take or upload proof photo</label>
+              <input id="proofInput" type="file" accept="image/*" capture="environment" />
+            </div>
+            <button class="btn secondary" type="button" onclick="clearProof()">Clear</button>
+          </div>
+          <div class="proofBox">
+            <div class="proofPreview" id="proofPreview"><div class="empty">No proof photo yet.<br>Use the camera or upload a file.</div></div>
+            <div class="fieldCard">
+              <div class="fieldLabel">Latest proof</div>
+              <div class="tiny" id="proofMeta" style="margin-top:8px;">Nothing uploaded yet</div>
+              <div class="teamRow" style="margin-top:12px;">
+                <button class="btn secondary sm" type="button" onclick="downloadProof()">Download copy</button>
+              </div>
+            </div>
+          </div>
+          <p class="tiny" style="margin-top:10px;">The image stays in this browser session so you can show it quickly during the game.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cardHead"><h2>Entering / leaving message</h2><span class="tiny">Fast copy-ready format</span></div>
+        <div class="cardBody">
+          <div class="formRow">
+            <div class="field">
+              <label for="msgStation">Station</label>
+              <input id="msgStation" list="stationList" placeholder="Charing Cross" />
+            </div>
+            <button class="btn secondary" type="button" onclick="buildMessage()">Build</button>
+          </div>
+          <datalist id="stationList"></datalist>
+          <div class="teamRow" style="margin-top:10px;">
+            <button class="btn secondary sm" type="button" onclick="setMsgMode('Entering')">Entering</button>
+            <button class="btn secondary sm" type="button" onclick="setMsgMode('Leaving')">Leaving</button>
+          </div>
+          <div class="msgBox" id="messagePreview">[Entering/Leaving] [station] at [time]</div>
+          <div class="teamRow" style="margin-top:10px;">
+            <button class="btn" type="button" onclick="copyMessageText()">Copy text</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid2" style="margin-top:12px;">
+      <div class="card">
+        <div class="cardHead"><h2>Game log</h2><span class="tiny">Recent actions only</span></div>
+        <div class="cardBody">
+          <div class="log" id="log"></div>
+          <div class="teamRow" style="margin-top:10px;">
+            <button class="btn secondary" type="button" onclick="exportState()">Export state</button>
+            <button class="btn secondary" type="button" onclick="clearLog()">Clear log</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cardHead"><h2>Route alternatives</h2><span class="tiny">Tap a legal destination for this start</span></div>
+        <div class="cardBody">
+          <div class="routePills" id="routeAlternativePills"></div>
+          <p class="tiny" style="margin-top:10px;">Only legal destinations from the rulesheet appear here, and used stations are filtered out until you reset.</p>
+          <div class="teamRow" style="margin-top:12px;">
+            <button class="btn secondary sm" type="button" onclick="pickRandomLegalRoute()">Random legal route</button>
+            <button class="btn secondary sm" type="button" onclick="focusRouteOnMap()">Focus route</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="footerNote">Built for GitHub Pages: upload <strong>index.html</strong> at the repository root, plus the manifest and icons if you want the installable app experience.</p>
+  </div>
+
+  <script>
+    const STARTS = ["Finchley Road", "Highbury & Islington", "London Bridge", "West Brompton", "Whitechapel", "Wood Lane"];
+    const DESTINATIONS = ["Barking", "Belsize Park", "Clapham Common", "Gunnersbury", "Holland Park", "Leyton", "Manor House", "Pimlico", "Queen’s Park", "St John’s Wood", "Star Lane", "Wapping"];
+    const ROUTES = {"Finchley Road": ["Barking", "Belsize Park", "Manor House", "Pimlico", "Wapping"], "Highbury & Islington": ["Clapham Common", "Gunnersbury", "Holland Park", "Queen’s Park", "St John’s Wood"], "London Bridge": ["Barking", "Gunnersbury", "Leyton", "Manor House", "Queen’s Park"], "West Brompton": ["Belsize Park", "Clapham Common", "Leyton", "Star Lane", "Wapping"], "Whitechapel": ["Belsize Park", "Clapham Common", "Manor House", "Pimlico", "Queen’s Park"], "Wood Lane": ["Barking", "Manor House", "St John’s Wood", "Star Lane", "Wapping"]};
+    const CHALLENGES = ["Touch a church", "Touch a bank", "Lie on the ground for 30 seconds", "Acronym sentence using your last station", "Wait for 2 minutes", "Buy something with a Union Jack on it", "Take the bus to another station", "Buy and wear a hat", "Go to a charity shop", "Find a public toilet and touch the entrance", "Call your number neighbour(s)", "Stand inside a telephone booth", "Touch real grass", "Reach the nearest street beginning with A, B, or C", "Stand on a bridge", "Sit in a park for 2 minutes", "Find a coin on the ground", "Pick litter for 60 seconds", "Find a folded paper tube map and touch it", "Say five sincere things you enjoyed today", "Draw the station entrance you just left", "Draw your opponents without reference", "Pour water over your head", "Find a vendor that sells Wii games", "Buy a gift for one of the chasers", "Film a bird", "Drink tea", "Read an advertisement out loud", "Take a memorable picture", "Buy and post a postcard", "Donate to charity"];
+    const POS = {"Finchley Road": [135, 115], "Highbury & Islington": [320, 110], "London Bridge": [470, 285], "West Brompton": [210, 455], "Whitechapel": [650, 200], "Wood Lane": [120, 330], "Barking": [910, 160], "Belsize Park": [230, 55], "Clapham Common": [325, 585], "Gunnersbury": [95, 575], "Holland Park": [180, 425], "Leyton": [765, 120], "Manor House": [560, 75], "Pimlico": [420, 515], "Queen’s Park": [125, 250], "St John’s Wood": [280, 165], "Star Lane": [845, 275], "Wapping": [870, 385]};
+    const PATHS = [{"start": "Finchley Road", "dest": "Barking", "d": "M 135 115 Q 577.5 67.5 910 160"}, {"start": "Finchley Road", "dest": "Belsize Park", "d": "M 135 115 Q 237.5 155.0 230 55"}, {"start": "Finchley Road", "dest": "Manor House", "d": "M 135 115 Q 402.5 165.0 560 75"}, {"start": "Finchley Road", "dest": "Pimlico", "d": "M 135 115 Q 332.5 245.0 420 515"}, {"start": "Finchley Road", "dest": "Wapping", "d": "M 135 115 Q 557.5 180.0 870 385"}, {"start": "Highbury & Islington", "dest": "Clapham Common", "d": "M 320 110 Q 377.5 277.5 325 585"}, {"start": "Highbury & Islington", "dest": "Gunnersbury", "d": "M 320 110 Q 152.5 272.5 95 575"}, {"start": "Highbury & Islington", "dest": "Holland Park", "d": "M 320 110 Q 195.0 197.5 180 425"}, {"start": "Highbury & Islington", "dest": "Queen’s Park", "d": "M 320 110 Q 167.5 110.0 125 250"}, {"start": "Highbury & Islington", "dest": "St John’s Wood", "d": "M 320 110 Q 245.0 67.5 280 165"}, {"start": "London Bridge", "dest": "Barking", "d": "M 470 285 Q 745.0 312.5 910 160"}, {"start": "London Bridge", "dest": "Gunnersbury", "d": "M 470 285 Q 227.5 380.0 95 575"}, {"start": "London Bridge", "dest": "Leyton", "d": "M 470 285 Q 672.5 292.5 765 120"}, {"start": "London Bridge", "dest": "Manor House", "d": "M 470 285 Q 570.0 270.0 560 75"}, {"start": "London Bridge", "dest": "Queen’s Park", "d": "M 470 285 Q 242.5 357.5 125 250"}, {"start": "West Brompton", "dest": "Belsize Park", "d": "M 210 455 Q 275.0 325.0 230 55"}, {"start": "West Brompton", "dest": "Clapham Common", "d": "M 210 455 Q 322.5 450.0 325 585"}, {"start": "West Brompton", "dest": "Leyton", "d": "M 210 455 Q 542.5 357.5 765 120"}, {"start": "West Brompton", "dest": "Star Lane", "d": "M 210 455 Q 582.5 435.0 845 275"}, {"start": "West Brompton", "dest": "Wapping", "d": "M 210 455 Q 595.0 490.0 870 385"}, {"start": "Whitechapel", "dest": "Belsize Park", "d": "M 650 200 Q 385.0 197.5 230 55"}, {"start": "Whitechapel", "dest": "Clapham Common", "d": "M 650 200 Q 432.5 322.5 325 585"}, {"start": "Whitechapel", "dest": "Manor House", "d": "M 650 200 Q 550.0 207.5 560 75"}, {"start": "Whitechapel", "dest": "Pimlico", "d": "M 650 200 Q 480.0 287.5 420 515"}, {"start": "Whitechapel", "dest": "Queen’s Park", "d": "M 650 200 Q 332.5 155.0 125 250"}, {"start": "Wood Lane", "dest": "Barking", "d": "M 120 330 Q 570.0 315.0 910 160"}, {"start": "Wood Lane", "dest": "Manor House", "d": "M 120 330 Q 395.0 272.5 560 75"}, {"start": "Wood Lane", "dest": "St John’s Wood", "d": "M 120 330 Q 255.0 317.5 280 165"}, {"start": "Wood Lane", "dest": "Star Lane", "d": "M 120 330 Q 537.5 372.5 845 275"}, {"start": "Wood Lane", "dest": "Wapping", "d": "M 120 330 Q 550.0 287.5 870 385"}];
+    const SAVE_KEY = 'tag-across-london-v2-state';
+    const PROOF_KEY = 'tag-across-london-v2-proof';
+    const THEME_KEY = 'tag-across-london-v2-theme';
+    function createDefaultState() {
+      return {
+        start: null,
+        dest: null,
+        lockedRoute: null,
+        currentChallenge: null,
+        score: { runners: 0, chasers: 0 },
+        teams: {
+          runners: { name: 'Runners', color: '#7dd3fc' },
+          chasers: { name: 'Chasers', color: '#34d399' },
+        },
+        usedStarts: [],
+        usedDests: [],
+        usedChallenges: [],
+        round: 1,
+        role: 'Runners',
+        rerollAvailable: true,
+        msgMode: 'Entering',
+        timers: { head: null, bus: null, challenge: null },
+        log: [],
+        proof: null,
+      };
+    }
+    const state = createDefaultState();
+
+    const $ = (id) => document.getElementById(id);
+    const fmt = (n) => n < 10 ? '0' + n : String(n);
+    let proofUrl = null;
+    let deferredPrompt = null;
+
+    function nowTime() { return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+    function save() { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }
+    function saveTheme(theme) { localStorage.setItem(THEME_KEY, theme); document.documentElement.dataset.theme = theme; }
+    function getTheme() { return localStorage.getItem(THEME_KEY) || 'dark'; }
+    function addLog(text) { state.log.unshift({ at: new Date().toISOString(), text }); state.log = state.log.slice(0, 30); save(); renderLog(); }
+    function randChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function availableStarts() { return STARTS.filter(s => !state.usedStarts.includes(s)); }
+    function availableDests() { return (state.start ? ROUTES[state.start] : DESTINATIONS).filter(d => !state.usedDests.includes(d)); }
+    function availableChallenges() { return CHALLENGES.filter(c => !state.usedChallenges.includes(c)); }
+    function routeSignature() { return state.lockedRoute ? `${state.lockedRoute.start}__${state.lockedRoute.dest}` : ''; }
+    function routeLink() {
+      if (!state.lockedRoute) return '';
+      const s = encodeURIComponent(`${state.lockedRoute.start}, London, UK`);
+      const d = encodeURIComponent(`${state.lockedRoute.dest}, London, UK`);
+      return `https://www.google.com/maps/dir/?api=1&origin=${s}&destination=${d}&travelmode=transit`;
+    }
+
+    function load() {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (raw) {
+        try {
+          const saved = JSON.parse(raw);
+          Object.assign(state, saved);
+          state.score = saved.score || state.score;
+          state.teams = saved.teams || state.teams;
+          state.usedStarts = saved.usedStarts || [];
+          state.usedDests = saved.usedDests || [];
+          state.usedChallenges = saved.usedChallenges || [];
+          state.timers = Object.assign({ head: null, bus: null, challenge: null }, saved.timers || {});
+          state.log = saved.log || [];
+        } catch (e) { console.warn(e); }
+      }
+      document.documentElement.dataset.theme = getTheme();
+      $('teamNameRunners').value = state.teams.runners.name;
+      $('teamNameChasers').value = state.teams.chasers.name;
+      $('teamColorRunners').value = state.teams.runners.color;
+      $('teamColorChasers').value = state.teams.chasers.color;
+      const key = localStorage.getItem(PROOF_KEY);
+      if (key) {
+        state.proof = JSON.parse(key);
+        if (state.proof.src) proofUrl = state.proof.src;
+      }
+    }
+
+    function persistTeams() {
+      state.teams.runners.name = $('teamNameRunners').value.trim() || 'Runners';
+      state.teams.chasers.name = $('teamNameChasers').value.trim() || 'Chasers';
+      state.teams.runners.color = $('teamColorRunners').value;
+      state.teams.chasers.color = $('teamColorChasers').value;
+      save();
+      renderAll();
+    }
+
+    ['teamNameRunners','teamNameChasers','teamColorRunners','teamColorChasers'].forEach(id => {
+      window.addEventListener('DOMContentLoaded', () => {
+        const el = $(id);
+        if (el) el.addEventListener('input', persistTeams);
+      });
+    });
+
+    function spinDisplay(el, choices, finalValue, ticks = 24, speed = 40) {
+      let i = 0;
+      el.classList.remove('shake');
+      el.classList.add('spin');
+      const timer = setInterval(() => { el.textContent = choices[i % choices.length]; i++; }, speed);
+      setTimeout(() => {
+        clearInterval(timer);
+        el.textContent = finalValue;
+        el.classList.remove('spin');
+        el.classList.add('shake');
+        setTimeout(() => el.classList.remove('shake'), 350);
+      }, speed * ticks);
+    }
+
+    function spinStart() {
+      const pool = availableStarts();
+      if (!pool.length) { state.usedStarts = []; addLog('Start pool refreshed.'); return spinStart(); }
+      state.start = randChoice(pool);
+      state.dest = null;
+      state.lockedRoute = null;
+      spinDisplay($('startWheel'), pool, state.start);
+      $('destWheel').textContent = 'Spin a destination';
+      $('lockedRouteText').textContent = 'Nothing locked yet';
+      addLog(`Spun start: ${state.start}`);
+      save(); renderAll();
+    }
+
+    function spinDestination() {
+      if (!state.start) { $('destWheel').textContent = 'Spin a start first'; return; }
+      const pool = availableDests();
+      if (!pool.length) { state.usedDests = []; addLog(`Destination pool refreshed for ${state.start}.`); return spinDestination(); }
+      state.dest = randChoice(pool);
+      state.lockedRoute = null;
+      spinDisplay($('destWheel'), pool, state.dest);
+      addLog(`Spun destination for ${state.start}: ${state.dest}`);
+      save(); renderAll();
+    }
+
+    function spinChallenge(opts = {}) {
+      const reroll = !!opts.reroll;
+      const timeout = !!opts.timeout;
+      const pool = availableChallenges();
+      if (!pool.length) { state.usedChallenges = []; addLog('Challenge pool refreshed.'); return spinChallenge(opts); }
+      if (reroll && !state.rerollAvailable && !timeout) { addLog('Free reroll already used this round.'); return; }
+      if (reroll && !timeout) state.rerollAvailable = false;
+      state.currentChallenge = randChoice(pool);
+      spinDisplay($('challengeWheel'), pool, state.currentChallenge, 24, 36);
+      addLog(`${timeout ? 'Timeout reroll' : reroll ? 'Rerolled challenge' : 'Spun challenge'}: ${state.currentChallenge}`);
+      save(); renderAll();
+    }
+
+    function rerollChallenge() {
+      if (state.rerollAvailable) return spinChallenge({ reroll: true });
+      if (timersDone('challenge')) return spinChallenge({ timeout: true });
+      addLog('No reroll available right now.');
+    }
+
+    function completeChallenge() {
+      if (!state.currentChallenge) { addLog('No challenge selected to mark as done.'); return; }
+      if (!state.usedChallenges.includes(state.currentChallenge)) state.usedChallenges.push(state.currentChallenge);
+      addLog(`Completed challenge: ${state.currentChallenge}`);
+      state.currentChallenge = null;
+      save(); renderAll();
+    }
+
+    function lockStart() {
+      if (!state.start) return;
+      if (!state.usedStarts.includes(state.start)) state.usedStarts.push(state.start);
+      addLog(`Locked start: ${state.start}`);
+      save(); renderAll();
+    }
+
+    function lockRoute() {
+      if (!state.start || !state.dest) { addLog('Tried to lock a route before both stations were selected.'); return; }
+      if (!state.usedStarts.includes(state.start)) state.usedStarts.push(state.start);
+      if (!state.usedDests.includes(state.dest)) state.usedDests.push(state.dest);
+      state.lockedRoute = { start: state.start, dest: state.dest };
+      addLog(`Locked route: ${state.start} → ${state.dest}`);
+      save(); renderAll();
+    }
+
+    function pickRoute(dest) {
+      if (!state.start) return;
+      state.dest = dest;
+      state.lockedRoute = null;
+      addLog(`Picked destination: ${dest}`);
+      save(); renderAll();
+    }
+
+    function pickRandomLegalRoute() {
+      if (!state.start) { spinStart(); return; }
+      if (!state.dest) spinDestination();
+      if (state.start && state.dest) lockRoute();
+    }
+
+    function focusRouteOnMap() { renderMap(); }
+
+    function addPoint(team) { state.score[team] += 1; addLog(`${state.teams[team].name} point added.`); save(); renderAll(); }
+    function removePoint(team) { state.score[team] = Math.max(0, state.score[team] - 1); addLog(`${state.teams[team].name} point removed.`); save(); renderAll(); }
+    function switchRole() { state.role = state.role === 'Runners' ? 'Chasers' : 'Runners'; addLog(`Role switched to ${state.role}.`); save(); renderAll(); }
+    function newRound() { state.round += 1; state.rerollAvailable = true; state.currentChallenge = null; state.timers.challenge = null; addLog(`Round ${state.round} started. Free reroll restored.`); save(); renderAll(); }
+    function resetGame() {
+      const ok = window.confirm ? window.confirm('Reset the entire game state?') : true;
+      if (!ok) return;
+      localStorage.removeItem(SAVE_KEY);
+      localStorage.removeItem(PROOF_KEY);
+      Object.assign(state, createDefaultState());
+      proofUrl = null;
+      $('teamNameRunners').value = state.teams.runners.name;
+      $('teamNameChasers').value = state.teams.chasers.name;
+      $('teamColorRunners').value = state.teams.runners.color;
+      $('teamColorChasers').value = state.teams.chasers.color;
+      $('msgStation').value = '';
+      renderAll();
+    }
+    function clearLog() { state.log = []; save(); renderAll(); }
+
+    function startTimer(kind, minutes) { state.timers[kind] = Date.now() + minutes * 60 * 1000; addLog(`${kind} timer started for ${minutes} minutes.`); save(); renderAll(); }
+    function clearTimer(kind) { state.timers[kind] = null; addLog(`${kind} timer cleared.`); save(); renderAll(); }
+    function timersDone(kind) { const end = state.timers[kind]; return !!end && Date.now() >= end; }
+
+    function renderTimer(kind, totalMinutes, labelId, barId) {
+      const end = state.timers[kind];
+      const label = $(labelId), bar = $(barId);
+      if (!end) { label.textContent = 'Ready'; bar.style.width = '0%'; return; }
+      const remaining = end - Date.now();
+      if (remaining <= 0) { label.textContent = '00:00'; bar.style.width = '100%'; return; }
+      const totalMs = totalMinutes * 60000;
+      const pct = Math.min(100, 100 - (remaining / totalMs) * 100);
+      const min = Math.floor(remaining / 60000);
+      const sec = Math.floor((remaining % 60000) / 1000);
+      label.textContent = `${fmt(min)}:${fmt(sec)}`;
+      bar.style.width = pct.toFixed(1) + '%';
+    }
+
+    function buildMessage() {
+      const station = $('msgStation').value.trim() || state.start || 'station';
+      $('messagePreview').textContent = `[${state.msgMode}] ${station} at ${nowTime()}`;
+    }
+    function setMsgMode(mode) { state.msgMode = mode; buildMessage(); addLog(`Message mode set to ${mode}.`); save(); }
+    function copyMessageText() { navigator.clipboard?.writeText($('messagePreview').textContent); addLog('Message copied to clipboard.'); }
+
+    function downloadText(filename, text) {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
+    }
+    function exportState() { addLog('Exported game state.'); downloadText('tag-across-london-state.json', JSON.stringify(state, null, 2)); }
+
+    function routePath(start, dest) { const [sx, sy] = POS[start], [dx, dy] = POS[dest]; const mx = (sx + dx) / 2; const cx = mx + (dx > sx ? 55 : -55); const cy = (sy + dy) / 2 - (dy > sy ? 70 : -70); return `M ${sx} ${sy} Q ${cx} ${cy} ${dx} ${dy}`; }
+
+    function pickStation(name) {
+      if (STARTS.includes(name)) { state.start = name; state.dest = null; state.lockedRoute = null; addLog(`Picked start manually: ${name}`); }
+      else if (DESTINATIONS.includes(name)) { state.dest = name; state.lockedRoute = null; addLog(`Picked destination manually: ${name}`); }
+      save(); renderAll();
+    }
+
+    function renderMap() {
+      const svg = $('mapSvg');
+      const selectedStart = state.lockedRoute?.start || state.start;
+      const selectedDest = state.lockedRoute?.dest || state.dest;
+      const routesHtml = PATHS.map(({start, dest, d}) => {
+        const cls = ['route'];
+        if (selectedStart === start && selectedDest === dest) cls.push('active');
+        return `<path d="${d}" class="${cls.join(' ')}" stroke="${selectedStart===start && selectedDest===dest ? '#f8fafc' : '#94a3b8'}"></path>`;
+      }).join('');
+      const nodes = Object.entries(POS).map(([name, [x, y]]) => {
+        const isStart = STARTS.includes(name);
+        const isDest = DESTINATIONS.includes(name);
+        const selected = name === selectedStart || name === selectedDest;
+        const fill = isStart ? 'rgba(251,146,60,.96)' : isDest ? 'rgba(34,197,94,.96)' : 'rgba(148,163,184,.72)';
+        const textX = x + (x > 750 ? -18 : 16);
+        const textAnchor = x > 750 ? 'end' : 'start';        const safe = name.replace(/'/g, "\'");
+        return `<g style="cursor:pointer" onclick="pickStation('${safe}')"><circle cx="${x}" cy="${y}" r="11" class="node ${isStart ? 'start' : isDest ? 'dest' : ''} ${selected ? 'selected' : ''}" fill="${fill}" /><text x="${textX}" y="${y + 4}" text-anchor="${textAnchor}">${name}</text></g>`;
+      }).join('');
+      svg.innerHTML = `
+        <rect x="0" y="0" width="1000" height="660" rx="28" fill="rgba(8,17,31,.15)"></rect>
+        <rect x="22" y="22" width="956" height="616" rx="22" class="titleBand"></rect>
+        <text x="500" y="54" text-anchor="middle" style="font-size:18px; font-weight:900;">Schematic route board</text>
+        <text x="500" y="77" text-anchor="middle" style="font-size:12px; font-weight:700; fill:var(--muted);">Tap any node to choose it manually, or use the spinner</text>
+        ${routesHtml}
+        ${nodes}
+        ${selectedStart && selectedDest ? `
+          <path d="${routePath(selectedStart, selectedDest)}" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" opacity=".16"></path>
+          <path d="${routePath(selectedStart, selectedDest)}" fill="none" stroke="#f8fafc" stroke-width="6" stroke-linecap="round" opacity=".96"></path>
+        ` : ''}
+      `;
+    }
+
+    function renderRoutePills() {
+      const box = $('routeAlternativePills');
+      if (!state.start) { box.innerHTML = '<span class="tag">Spin a start to see route alternatives</span>'; return; }
+      const routes = ROUTES[state.start].filter(d => !state.usedDests.includes(d) || d === state.dest);
+      box.innerHTML = routes.map(d => `<button type="button" onclick="pickRoute('${d.replace(/'/g, "\\'")}')">${d}</button>`).join('');
+      const altBox = $('routeAlternatives');
+      altBox.innerHTML = routes.map(d => `<button type="button" onclick="pickRoute('${d.replace(/'/g, "\\'")}')">${d}</button>`).join('');
+    }
+
+    function renderLog() {
+      const el = $('log');
+      if (!state.log.length) { el.innerHTML = '<div class="logItem">No actions yet. Spin a route, start a timer, or mark a challenge done.</div>'; return; }
+      el.innerHTML = state.log.map(item => `<div class="logItem"><strong>${new Date(item.at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</strong><br>${item.text}</div>`).join('');
+    }
+
+    function renderProof() {
+      const meta = $('proofMeta');
+      const preview = $('proofPreview');
+      if (!proofUrl) { meta.textContent = 'Nothing uploaded yet'; preview.innerHTML = '<div class="empty">No proof photo yet.<br>Use the camera or upload a file.</div>'; return; }
+      meta.textContent = state.proof ? `${state.proof.name} • ${state.proof.type || 'image'} • ${Math.round((state.proof.size || 0)/1024)} KB` : 'Proof loaded';
+      preview.innerHTML = `<img src="${proofUrl}" alt="Challenge proof" />`;
+    }
+
+    function clearProof() { proofUrl = null; state.proof = null; localStorage.removeItem(PROOF_KEY); addLog('Challenge proof cleared.'); renderProof(); }
+    function downloadProof() { if (!proofUrl) return; const a = document.createElement('a'); a.href = proofUrl; a.download = state.proof?.name || 'challenge-proof.jpg'; a.click(); }
+
+    function handleProofUpload(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        proofUrl = reader.result;
+        state.proof = { name: file.name, type: file.type, size: file.size, src: proofUrl, at: new Date().toISOString() };
+        localStorage.setItem(PROOF_KEY, JSON.stringify(state.proof));
+        addLog(`Loaded proof photo: ${file.name}`);
+        renderProof();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function openGoogleMapsTransit() { if (!state.lockedRoute) { addLog('Lock a route first.'); return; } window.open(routeLink(), '_blank', 'noopener,noreferrer'); }
+    function copyTransitLink() { if (!state.lockedRoute) { addLog('Lock a route first.'); return; } navigator.clipboard?.writeText(routeLink()); addLog('Transit link copied.'); }
+    async function shareTransitLink() {
+      if (!state.lockedRoute) { addLog('Lock a route first.'); return; }
+      const url = routeLink();
+      if (navigator.share) { try { await navigator.share({ title: 'Tag Across London transit route', url }); addLog('Shared transit link.'); } catch {} }
+      else { copyTransitLink(); }
+    }
+
+    function syncThemeButton() { $('themeBtn').textContent = document.documentElement.dataset.theme === 'light' ? 'Dark mode' : 'Light mode'; }
+    function toggleTheme() {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      saveTheme(next); syncThemeButton();
+    }
+
+    function renderAll() {
+      $('scoreRunners').textContent = state.score.runners;
+      $('scoreChasers').textContent = state.score.chasers;
+      $('swatchRunners').style.background = state.teams.runners.color;
+      $('swatchChasers').style.background = state.teams.chasers.color;
+      $('teamCardRunners').style.borderColor = state.teams.runners.color + '55';
+      $('teamCardChasers').style.borderColor = state.teams.chasers.color + '55';
+      $('roleLabel').textContent = `Active: ${state.role}`;
+      $('chipRoute').textContent = state.lockedRoute ? `${state.lockedRoute.start} → ${state.lockedRoute.dest}` : state.start && state.dest ? `${state.start} → ${state.dest}` : 'No route locked';
+      $('chipRound').textContent = `Round ${state.round}`;
+      $('chipReroll').textContent = state.rerollAvailable ? 'Free reroll ready' : 'Free reroll used';
+      $('routeSummary').textContent = state.lockedRoute ? `${state.lockedRoute.start} → ${state.lockedRoute.dest}` : state.start && state.dest ? `${state.start} → ${state.dest}` : 'No route locked yet';
+      $('lockedRouteText').textContent = state.lockedRoute ? `${state.lockedRoute.start} → ${state.lockedRoute.dest}` : 'Nothing locked yet';
+      $('challengeSummary').textContent = state.currentChallenge || 'No challenge selected';
+      $('startWheel').textContent = state.start || 'Tap spin';
+      $('destWheel').textContent = state.dest || (state.start ? 'Spin destination' : 'Pick a start first');
+      $('challengeWheel').textContent = state.currentChallenge || 'Tap spin for a challenge';
+      $('msgStation').value = $('msgStation').value || state.start || '';
+      $('messagePreview').textContent = `[${state.msgMode}] ${$('msgStation').value.trim() || state.start || 'station'} at ${nowTime()}`;
+      renderTimer('head', 15, 'headTimer', 'headBar');
+      renderTimer('bus', 10, 'busTimer', 'busBar');
+      renderTimer('challenge', 15, 'challengeTimer', 'challengeBar');
+      renderMap();
+      renderRoutePills();
+      renderLog();
+      renderProof();
+      save();
+    }
+
+    function init() {
+      load();
+      syncThemeButton();
+      if (!state.log.length) addLog('Game loaded.');
+      $('teamNameRunners').addEventListener('input', persistTeams);
+      $('teamNameChasers').addEventListener('input', persistTeams);
+      $('teamColorRunners').addEventListener('input', persistTeams);
+      $('teamColorChasers').addEventListener('input', persistTeams);
+      $('themeBtn').addEventListener('click', toggleTheme);
+      $('proofInput').addEventListener('change', e => handleProofUpload(e.target.files?.[0]));
+      $('msgStation').addEventListener('input', buildMessage);
+      $('msgStation').addEventListener('change', buildMessage);
+      $('installBtn').addEventListener('click', async () => { if (!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; $('installBtn').style.display = 'none'; });
+      STARTS.concat(DESTINATIONS).forEach(station => { const opt = document.createElement('option'); opt.value = station; $('stationList').appendChild(opt); });
+      setInterval(renderAll, 1000);
+      renderAll();
+      if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.warn);
+      window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; $('installBtn').style.display = 'inline-flex'; });
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
